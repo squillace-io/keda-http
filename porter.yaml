@@ -1,0 +1,104 @@
+# This is the configuration for Porter
+# You must define steps for each action, but the rest is optional
+# See https://porter.sh/author-bundles for documentation on how to configure your bundle
+# Uncomment out the sections below to take full advantage of what Porter can do!
+
+name: keda-http
+version: 0.1.0
+description: "An example Porter configuration"
+# TODO: update the registry to your own, e.g. myregistry
+registry: ghcr.io/squillace-io
+
+# If you want to customize the Dockerfile in use, uncomment the line below and update the referenced file. 
+# See https://porter.sh/custom-dockerfile/
+dockerfile: Dockerfile.tmpl
+
+mixins:
+  - kubernetes
+  - exec
+  - helm3:
+      clientVersion: v3.3.4
+      repositories:
+        kedacore:
+          url: "https://kedacore.github.io/charts"
+
+# kubectl create namespace keda
+# helm install keda kedacore/keda --namespace keda
+
+install:
+  - exec:
+      command: bash
+      description: "Creating the keda namespace."
+      flags:
+          c: '"kubectl create ns keda --dry-run -o yaml | kubectl apply -f -"' 
+
+  - helm3: 
+      description: "Displaying Keda..."
+      arguments:
+        - "repo"
+        - "list"
+
+  - helm3: 
+      description: "Installating Keda..."
+      arguments:
+        - "install"
+        - "keda"
+        - "kedacore/keda"
+        - "--version 2.0.0"
+        - "--namespace keda"
+
+  - exec:
+      command: bash
+      description: "Creating the ingress namespace."
+      flags:
+          c: '"kubectl create ns {{ bundle.parameters.NAMESPACE }} --dry-run -o yaml | kubectl apply -f -"' 
+  - helm3: 
+      description: "Installing the http-add-on...."
+      arguments:
+        - "upgrade"
+        - "keda"
+        - "kedacore/keda"
+        - "--install"
+        - "--set watchNamespace={{ bundle.parameters.NAMESPACE }}"
+
+upgrade:
+  - exec:
+      description: "World 2.0"
+      command: ./helpers.sh
+      arguments:
+        - upgrade
+
+uninstall:
+  - helm3:
+      description: "Deleting the keda deployment..."
+      arguments:
+        - "delete"
+        - "keda"
+        - "namespace keda"
+
+  - exec:
+      command: bash
+      description: "Deleting the keda namespace."
+      flags:
+          c: '"kubectl create ns keda --dry-run -o yaml | kubectl delete -f -"' 
+  - exec:
+      command: bash
+      description: "Deleting the demo namespace."
+      flags:
+          c: '"kubectl create ns {{ bundle.parameters.NAMESPACE }} --dry-run -o yaml | kubectl delete -f -"' 
+
+# Below is an example of how to define credentials
+# See https://porter.sh/author-bundles/#credentials
+credentials:
+  - name: kubeconfig
+    path: /root/.kube/config
+#  - name: username
+#    env: USERNAME
+
+# Below is an example of how to define parameters
+# See https://porter.sh/author-bundles/#parameters
+parameters:
+  - name: NAMESPACE
+    type: string
+    env: NAMESPACE
+    default: demo
