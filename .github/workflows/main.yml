@@ -33,6 +33,7 @@ jobs:
         password: ${{ secrets.GHCR_PASSWORD }} # secrets.GHCR_PASSWORD
     - name: Retag bundle for ghcr.io
       run: |
+        grep -oP "(?<=version: )[0-9].[0-9].[0-9]+" porter.yaml
         porter build --version "$(grep -oP "(?<=version: )[0-9].[0-9].[0-9]+" porter.yaml)"-$(git rev-list --max-count=1 HEAD)
         # sed -i.bu 's/squillace/${{ github.repository_owner }}/g' ./porter.yaml
         # grep "registry:" ./porter.yaml
