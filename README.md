@@ -1,6 +1,12 @@
-# My First Bundle
+# Developer bundle for Keda and Http-Add-on
 
-This is an empty bundle that porter has created to get you started!
+This Porter bundle installs Keda and the Keda Http add on into the Kubernetes cluster pointed at by the kubeconfig credential. 
+
+It also uninstalls the same packages. Both installations use Helm, in this case the bundle uses the Helm3 mixin my MChorfa. Building it locally requires adding that mixin: 
+
+> porter mixins install helm3 --url https://github.com/mchorfa/porter-helm3/releases/download --version v0.1.12
+
+The bundle repository https://github.com/squillace-io/keda-http also has a GH action workflow that requires a secrets.GHCR_PASSWORD to be created if you want to start automating your bundles, and the action will modify the bundle registry and tag with your org/repo and also add the Git commit to the tag.
 
 # Contents
 
@@ -10,34 +16,9 @@ This is the porter manifest. See https://porter.sh/author-bundles/ for
 details on every field and how to configure your bundle. This is a required
 file.
 
-## helpers.sh
-
-This is a bash script where you can place helper functions that you can call
-from your porter.yaml file.
-
-## README.md
-
-This explains the files created by `porter create`. It is not used by porter and
-can be deleted.
-
 ## Dockerfile.tmpl
 
-This is a template Dockerfile for the bundle's invocation image. You can
-customize it to use different base images, install tools and copy configuration
-files. Porter will use it as a template and append lines to it for the mixin and to set
-the CMD appropriately for the CNAB specification. You can delete this file if you don't
-need it.
-
-Add the following line to **porter.yaml** to enable the Dockerfile template:
-
-```yaml
-dockerfile: Dockerfile.tmpl
-```
-
-By default, the Dockerfile template is disabled and Porter automatically copies
-all of the files in the current directory into the bundle's invocation image. When
-you use a custom Dockerfile template, you must manually copy files into the bundle
-using COPY statements in the Dockerfile template.
+Currently, the Dockerfile.tmpl is used to clone and install the helm chart for keda-http. In the future, this step will be removed.
 
 ## .gitignore
 

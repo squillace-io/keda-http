@@ -4,7 +4,7 @@
 # Uncomment out the sections below to take full advantage of what Porter can do!
 
 name: keda-http
-version: 0.1.2
+version: 0.1.4
 description: "An example Porter configuration"
 # TODO: update the registry to your own, e.g. myregistry
 registry: ghcr.io/squillace-io
@@ -34,7 +34,7 @@ install:
 
 
   - helm3:
-      description: "Use Helm to deploy an NGINX ingress controller."
+      description: "Use Helm to deploy keda..."
       upsert: true # uses "helm3 upgrade --install" instead of install. Can't use --replace.
       name: keda # parameterize
       chart: kedacore/keda
@@ -71,10 +71,11 @@ install:
 
 upgrade:
   - exec:
-      description: "World 2.0"
-      command: ./helpers.sh
-      arguments:
-        - upgrade
+      description: "Not yet implemented."
+      command: bash
+      flags:
+        c: '"echo Upgrade is not yet implemented."'
+        
 
 uninstall:
   - helm3:
